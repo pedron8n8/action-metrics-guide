@@ -7,6 +7,7 @@ import { ConversionChart } from "@/components/dashboard/ConversionChart";
 import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
 import { DataTable } from "@/components/dashboard/DataTable";
 import { Filters } from "@/components/dashboard/Filters";
+import { DateRange } from "react-day-picker";
 import { 
   MessageSquare, 
   Phone, 
@@ -38,6 +39,7 @@ const getUniqueDates = (data: KPIData[]) => {
 const Index = () => {
   const [selectedMember, setSelectedMember] = useState("all");
   const [selectedPeriod, setSelectedPeriod] = useState("all");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   
   const { data: kpiData, loading, refetch } = useAirtableData();
 
@@ -53,7 +55,18 @@ const Index = () => {
       data = data.filter(item => item.name === selectedMember);
     }
     
-    if (selectedPeriod !== "all") {
+    // Custom date range takes priority
+    if (dateRange?.from && dateRange?.to) {
+      const fromDate = new Date(dateRange.from);
+      fromDate.setHours(0, 0, 0, 0);
+      const toDate = new Date(dateRange.to);
+      toDate.setHours(23, 59, 59, 999);
+      
+      data = data.filter(item => {
+        const itemDate = new Date(item.date);
+        return itemDate >= fromDate && itemDate <= toDate;
+      });
+    } else if (selectedPeriod !== "all" && selectedPeriod !== "custom") {
       const today = new Date();
       const filterDate = new Date();
       
@@ -73,7 +86,7 @@ const Index = () => {
     }
     
     return data;
-  }, [kpiData, selectedMember, selectedPeriod]);
+  }, [kpiData, selectedMember, selectedPeriod, dateRange]);
 
   // Calculate totals and day-over-day comparison
   const { totals, changes } = useMemo(() => {
@@ -135,6 +148,8 @@ const Index = () => {
             onPeriodChange={setSelectedPeriod}
             members={members}
             onRefresh={refetch}
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
           />
         </header>
 
