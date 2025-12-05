@@ -1,1 +1,4 @@
 project_id = "xqoopwhjalskuqxofgen"
+
+[functions.fetch-airtable]
+verify_jwt = false
