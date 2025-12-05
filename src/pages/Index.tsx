@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { calculateTotals } from "@/data/mockData";
+import { calculateTotals, KPIData } from "@/data/mockData";
 import { useAirtableData } from "@/hooks/useAirtableData";
 import { KPICard } from "@/components/dashboard/KPICard";
 import { LeadsChart } from "@/components/dashboard/LeadsChart";
@@ -18,6 +18,22 @@ import {
   BarChart3,
   Loader2
 } from "lucide-react";
+
+// Helper to calculate percentage change
+const calcChange = (current: number, previous: number): number | undefined => {
+  if (previous === 0) return current > 0 ? 100 : undefined;
+  return ((current - previous) / previous) * 100;
+};
+
+// Get data grouped by date
+const getDataByDate = (data: KPIData[], date: string) => {
+  return data.filter(item => item.date === date);
+};
+
+// Get unique dates sorted descending
+const getUniqueDates = (data: KPIData[]) => {
+  return [...new Set(data.map(item => item.date))].sort((a, b) => b.localeCompare(a));
+};
 
 const Index = () => {
   const [selectedMember, setSelectedMember] = useState("all");
@@ -59,7 +75,38 @@ const Index = () => {
     return data;
   }, [kpiData, selectedMember, selectedPeriod]);
 
-  const totals = useMemo(() => calculateTotals(filteredData), [filteredData]);
+  // Calculate totals and day-over-day comparison
+  const { totals, changes } = useMemo(() => {
+    const currentTotals = calculateTotals(filteredData);
+    
+    // Get unique dates and find today and yesterday
+    const dates = getUniqueDates(filteredData);
+    const latestDate = dates[0];
+    const previousDate = dates[1];
+    
+    let changes: Record<string, number | undefined> = {};
+    
+    if (latestDate && previousDate) {
+      const todayData = getDataByDate(filteredData, latestDate);
+      const yesterdayData = getDataByDate(filteredData, previousDate);
+      
+      const todayTotals = calculateTotals(todayData);
+      const yesterdayTotals = calculateTotals(yesterdayData);
+      
+      changes = {
+        totalSMS: calcChange(todayTotals.totalSMS, yesterdayTotals.totalSMS),
+        totalColdCalls: calcChange(todayTotals.totalColdCalls, yesterdayTotals.totalColdCalls),
+        totalInbound: calcChange(todayTotals.totalInbound, yesterdayTotals.totalInbound),
+        totalHotLeads: calcChange(todayTotals.totalHotLeads, yesterdayTotals.totalHotLeads),
+        totalOffers: calcChange(todayTotals.totalOffers, yesterdayTotals.totalOffers),
+        totalContracts: calcChange(todayTotals.totalContracts, yesterdayTotals.totalContracts),
+        avgSMSRate: calcChange(todayTotals.avgSMSRate, yesterdayTotals.avgSMSRate),
+        avgCloseRate: calcChange(todayTotals.avgCloseRate, yesterdayTotals.avgCloseRate),
+      };
+    }
+    
+    return { totals: currentTotals, changes };
+  }, [filteredData]);
 
   const coldLeads = totals.totalInbound - totals.totalHotLeads - totals.totalWarmLeads;
 
@@ -73,11 +120,11 @@ const Index = () => {
               <div className="p-2 rounded-lg gradient-primary">
                 <BarChart3 className="h-6 w-6 text-white" />
               </div>
-              <h1 className="text-3xl font-bold tracking-tight">Dashboard de KPIs</h1>
+              <h1 className="text-3xl font-bold tracking-tight">KPI Dashboard</h1>
               {loading && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
             </div>
             <p className="text-muted-foreground">
-              Análise de performance da equipe • Dados do Airtable
+              Team Performance Analysis • Real-time Airtable Data
             </p>
           </div>
           
@@ -94,24 +141,24 @@ const Index = () => {
         {/* KPI Cards */}
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <KPICard
-            title="Total SMS Enviados"
-            value={totals.totalSMS.toLocaleString('pt-BR')}
-            change={12.5}
+            title="Total SMS Sent"
+            value={totals.totalSMS.toLocaleString('en-US')}
+            change={changes.totalSMS}
             icon={MessageSquare}
             variant="primary"
             delay={0}
           />
           <KPICard
-            title="Cold Calls Realizadas"
-            value={totals.totalColdCalls.toLocaleString('pt-BR')}
-            change={8.3}
+            title="Cold Calls Made"
+            value={totals.totalColdCalls.toLocaleString('en-US')}
+            change={changes.totalColdCalls}
             icon={Phone}
             delay={50}
           />
           <KPICard
-            title="Total Leads Inbound"
-            value={totals.totalInbound.toLocaleString('pt-BR')}
-            change={-2.1}
+            title="Total Inbound Leads"
+            value={totals.totalInbound.toLocaleString('en-US')}
+            change={changes.totalInbound}
             icon={Users}
             variant="success"
             delay={100}
@@ -119,7 +166,7 @@ const Index = () => {
           <KPICard
             title="Hot Leads"
             value={totals.totalHotLeads}
-            change={15.7}
+            change={changes.totalHotLeads}
             icon={Target}
             variant="warning"
             delay={150}
@@ -129,29 +176,31 @@ const Index = () => {
         {/* Secondary KPIs */}
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <KPICard
-            title="Ofertas Enviadas"
+            title="Offers Sent"
             value={totals.totalOffers}
+            change={changes.totalOffers}
             icon={FileText}
             delay={200}
           />
           <KPICard
-            title="Contratos Assinados"
+            title="Signed Contracts"
             value={totals.totalContracts}
-            change={25}
+            change={changes.totalContracts}
             icon={CheckCircle2}
             variant="success"
             delay={250}
           />
           <KPICard
-            title="Taxa Média SMS"
+            title="Avg SMS Rate"
             value={`${totals.avgSMSRate.toFixed(1)}%`}
+            change={changes.avgSMSRate}
             icon={TrendingUp}
             delay={300}
           />
           <KPICard
-            title="Taxa Média Fechamento"
+            title="Avg Close Rate"
             value={`${totals.avgCloseRate.toFixed(1)}%`}
-            change={5.2}
+            change={changes.avgCloseRate}
             icon={Target}
             variant="primary"
             delay={350}
@@ -180,7 +229,7 @@ const Index = () => {
 
         {/* Footer */}
         <footer className="text-center text-sm text-muted-foreground py-4 border-t border-border">
-          <p>Dashboard de Análise de KPIs • Dados sincronizados com Airtable</p>
+          <p>KPI Analysis Dashboard • Synced with Airtable</p>
         </footer>
       </div>
     </div>

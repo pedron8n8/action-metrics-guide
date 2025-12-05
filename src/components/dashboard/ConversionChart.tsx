@@ -13,9 +13,11 @@ export function ConversionChart({ hotLeads, warmLeads, coldLeads }: ConversionCh
     { name: 'Cold Leads', value: coldLeads, color: 'hsl(217 33% 40%)' },
   ];
 
+  const total = hotLeads + warmLeads + coldLeads;
+
   return (
     <div className="glass rounded-xl p-6 animate-slide-up" style={{ animationDelay: '300ms' }}>
-      <h3 className="text-lg font-semibold mb-6">Qualificação de Leads</h3>
+      <h3 className="text-lg font-semibold mb-6">Lead Qualification</h3>
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -27,6 +29,8 @@ export function ConversionChart({ hotLeads, warmLeads, coldLeads }: ConversionCh
               outerRadius={100}
               paddingAngle={5}
               dataKey="value"
+              label={({ name, value }) => `${name}: ${total > 0 ? ((value / total) * 100).toFixed(0) : 0}%`}
+              labelLine={false}
             >
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
@@ -39,6 +43,7 @@ export function ConversionChart({ hotLeads, warmLeads, coldLeads }: ConversionCh
                 borderRadius: '8px',
                 color: 'hsl(210 40% 98%)'
               }}
+              formatter={(value: number) => [`${value} (${total > 0 ? ((value / total) * 100).toFixed(1) : 0}%)`, '']}
             />
             <Legend />
           </PieChart>

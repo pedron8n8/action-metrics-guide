@@ -37,7 +37,7 @@ export function KPICard({ title, value, change, icon: Icon, variant = "default",
             )}>
               {isPositive ? <TrendingUp className="h-4 w-4" /> : isNegative ? <TrendingDown className="h-4 w-4" /> : null}
               <span>{isPositive ? "+" : ""}{change.toFixed(1)}%</span>
-              <span className="text-muted-foreground ml-1">vs anterior</span>
+              <span className="text-muted-foreground ml-1">vs previous day</span>
             </div>
           )}
         </div>
