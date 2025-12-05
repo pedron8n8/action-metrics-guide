@@ -6,8 +6,26 @@ interface LeadsChartProps {
 }
 
 export function LeadsChart({ data }: LeadsChartProps) {
-  const chartData = data.map(item => ({
-    name: item.name.split(' ')[0],
+  // Group data by member name
+  const groupedData = data.reduce((acc, item) => {
+    const existing = acc.find(x => x.name === item.name);
+    if (existing) {
+      existing.smsLeads += item.smsLeads;
+      existing.coldCallLeads += item.coldCallLeads;
+      existing.mailLeads += item.mailLeads;
+    } else {
+      acc.push({
+        name: item.name.split(' ')[0],
+        smsLeads: item.smsLeads,
+        coldCallLeads: item.coldCallLeads,
+        mailLeads: item.mailLeads,
+      });
+    }
+    return acc;
+  }, [] as { name: string; smsLeads: number; coldCallLeads: number; mailLeads: number }[]);
+
+  const chartData = groupedData.map(item => ({
+    name: item.name,
     'SMS Leads': item.smsLeads,
     'Cold Call Leads': item.coldCallLeads,
     'Mail Leads': item.mailLeads,
@@ -15,7 +33,7 @@ export function LeadsChart({ data }: LeadsChartProps) {
 
   return (
     <div className="glass rounded-xl p-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
-      <h3 className="text-lg font-semibold mb-6">Leads por Canal</h3>
+      <h3 className="text-lg font-semibold mb-6">Leads by Channel</h3>
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} barGap={4}>

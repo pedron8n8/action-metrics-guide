@@ -18,10 +18,10 @@ export function Filters({ selectedMember, onMemberChange, selectedPeriod, onPeri
         <Users className="h-4 w-4 text-muted-foreground" />
         <Select value={selectedMember} onValueChange={onMemberChange}>
           <SelectTrigger className="w-[180px] bg-card border-border">
-            <SelectValue placeholder="Todos os membros" />
+            <SelectValue placeholder="All members" />
           </SelectTrigger>
           <SelectContent className="bg-popover border-border">
-            <SelectItem value="all">Todos os membros</SelectItem>
+            <SelectItem value="all">All Members</SelectItem>
             {members.map(member => (
               <SelectItem key={member} value={member}>{member}</SelectItem>
             ))}
@@ -33,13 +33,13 @@ export function Filters({ selectedMember, onMemberChange, selectedPeriod, onPeri
         <Calendar className="h-4 w-4 text-muted-foreground" />
         <Select value={selectedPeriod} onValueChange={onPeriodChange}>
           <SelectTrigger className="w-[180px] bg-card border-border">
-            <SelectValue placeholder="Período" />
+            <SelectValue placeholder="Period" />
           </SelectTrigger>
           <SelectContent className="bg-popover border-border">
-            <SelectItem value="all">Todo período</SelectItem>
-            <SelectItem value="today">Hoje</SelectItem>
-            <SelectItem value="week">Última semana</SelectItem>
-            <SelectItem value="month">Último mês</SelectItem>
+            <SelectItem value="all">All Time</SelectItem>
+            <SelectItem value="today">Today</SelectItem>
+            <SelectItem value="week">Last Week</SelectItem>
+            <SelectItem value="month">Last Month</SelectItem>
           </SelectContent>
         </Select>
       </div>

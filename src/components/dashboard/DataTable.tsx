@@ -8,26 +8,26 @@ interface DataTableProps {
 
 export function DataTable({ data }: DataTableProps) {
   const getPerformanceBadge = (rate: number) => {
-    if (rate >= 50) return <Badge className="bg-success/20 text-success border-0">Excelente</Badge>;
-    if (rate >= 25) return <Badge className="bg-warning/20 text-warning border-0">Bom</Badge>;
-    return <Badge className="bg-destructive/20 text-destructive border-0">A Melhorar</Badge>;
+    if (rate >= 50) return <Badge className="bg-success/20 text-success border-0">Excellent</Badge>;
+    if (rate >= 25) return <Badge className="bg-warning/20 text-warning border-0">Good</Badge>;
+    return <Badge className="bg-destructive/20 text-destructive border-0">Needs Improvement</Badge>;
   };
 
   return (
     <div className="glass rounded-xl p-6 animate-slide-up overflow-hidden" style={{ animationDelay: '500ms' }}>
-      <h3 className="text-lg font-semibold mb-6">Detalhamento por Membro</h3>
+      <h3 className="text-lg font-semibold mb-6">Member Breakdown</h3>
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="border-border/50 hover:bg-transparent">
-              <TableHead className="text-muted-foreground">Nome</TableHead>
-              <TableHead className="text-muted-foreground">Data</TableHead>
-              <TableHead className="text-muted-foreground text-right">SMS Enviados</TableHead>
+              <TableHead className="text-muted-foreground">Name</TableHead>
+              <TableHead className="text-muted-foreground">Date</TableHead>
+              <TableHead className="text-muted-foreground text-right">SMS Sent</TableHead>
               <TableHead className="text-muted-foreground text-right">Cold Calls</TableHead>
               <TableHead className="text-muted-foreground text-right">Total Leads</TableHead>
               <TableHead className="text-muted-foreground text-right">Hot Leads</TableHead>
-              <TableHead className="text-muted-foreground text-right">Ofertas</TableHead>
-              <TableHead className="text-muted-foreground text-right">Contratos</TableHead>
+              <TableHead className="text-muted-foreground text-right">Offers</TableHead>
+              <TableHead className="text-muted-foreground text-right">Contracts</TableHead>
               <TableHead className="text-muted-foreground">Performance</TableHead>
             </TableRow>
           </TableHeader>
@@ -35,7 +35,7 @@ export function DataTable({ data }: DataTableProps) {
             {data.map((row) => (
               <TableRow key={`${row.id}-${row.date}`} className="border-border/30 hover:bg-accent/30">
                 <TableCell className="font-medium">{row.name}</TableCell>
-                <TableCell className="text-muted-foreground">{new Date(row.date).toLocaleDateString('pt-BR')}</TableCell>
+                <TableCell className="text-muted-foreground">{new Date(row.date).toLocaleDateString('en-US')}</TableCell>
                 <TableCell className="text-right">{row.smsSend}</TableCell>
                 <TableCell className="text-right">{row.coldCallsMade}</TableCell>
                 <TableCell className="text-right font-semibold text-primary">{row.totalInboundLeads}</TableCell>
