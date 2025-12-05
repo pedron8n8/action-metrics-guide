@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
-import { mockData, calculateTotals } from "@/data/mockData";
+import { calculateTotals } from "@/data/mockData";
+import { useAirtableData } from "@/hooks/useAirtableData";
 import { KPICard } from "@/components/dashboard/KPICard";
 import { LeadsChart } from "@/components/dashboard/LeadsChart";
 import { ConversionChart } from "@/components/dashboard/ConversionChart";
@@ -14,21 +15,23 @@ import {
   FileText, 
   CheckCircle2,
   TrendingUp,
-  BarChart3
+  BarChart3,
+  Loader2
 } from "lucide-react";
-import { toast } from "sonner";
 
 const Index = () => {
   const [selectedMember, setSelectedMember] = useState("all");
   const [selectedPeriod, setSelectedPeriod] = useState("all");
+  
+  const { data: kpiData, loading, refetch } = useAirtableData();
 
   const members = useMemo(() => 
-    [...new Set(mockData.map(item => item.name))],
-    []
+    [...new Set(kpiData.map(item => item.name))],
+    [kpiData]
   );
 
   const filteredData = useMemo(() => {
-    let data = mockData;
+    let data = kpiData;
     
     if (selectedMember !== "all") {
       data = data.filter(item => item.name === selectedMember);
@@ -54,13 +57,9 @@ const Index = () => {
     }
     
     return data;
-  }, [selectedMember, selectedPeriod]);
+  }, [kpiData, selectedMember, selectedPeriod]);
 
   const totals = useMemo(() => calculateTotals(filteredData), [filteredData]);
-
-  const handleRefresh = () => {
-    toast.success("Dados atualizados com sucesso!");
-  };
 
   const coldLeads = totals.totalInbound - totals.totalHotLeads - totals.totalWarmLeads;
 
@@ -75,9 +74,10 @@ const Index = () => {
                 <BarChart3 className="h-6 w-6 text-white" />
               </div>
               <h1 className="text-3xl font-bold tracking-tight">Dashboard de KPIs</h1>
+              {loading && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
             </div>
             <p className="text-muted-foreground">
-              Análise de performance da equipe • Atualizado em tempo real
+              Análise de performance da equipe • Dados do Airtable
             </p>
           </div>
           
@@ -87,7 +87,7 @@ const Index = () => {
             selectedPeriod={selectedPeriod}
             onPeriodChange={setSelectedPeriod}
             members={members}
-            onRefresh={handleRefresh}
+            onRefresh={refetch}
           />
         </header>
 
