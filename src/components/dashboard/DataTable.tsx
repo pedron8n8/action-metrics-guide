@@ -13,6 +13,7 @@ interface MemberSummary {
   totalColdCalls: number;
   totalLeads: number;
   hotLeads: number;
+  comparedProperties: number;
   offers: number;
   contracts: number;
   avgCloseRate: number;
@@ -22,12 +23,16 @@ export function DataTable({ data }: DataTableProps) {
   // Group and aggregate data by member
   const memberData = useMemo(() => {
     const grouped = data.reduce((acc, item) => {
+      // Total Leads = SMS Leads + Cold Call Leads + Mail Leads
+      const itemTotalLeads = item.smsLeads + item.coldCallLeads + item.mailLeads;
+      
       const existing = acc.get(item.name);
       if (existing) {
         existing.totalSMS += item.smsSend;
         existing.totalColdCalls += item.coldCallsMade;
-        existing.totalLeads += item.totalInboundLeads;
+        existing.totalLeads += itemTotalLeads;
         existing.hotLeads += item.hotLeads;
+        existing.comparedProperties += item.comparedProperties;
         existing.offers += item.offersSent;
         existing.contracts += item.signedContracts;
         existing.closeRates.push(item.closeRate);
@@ -36,8 +41,9 @@ export function DataTable({ data }: DataTableProps) {
           name: item.name,
           totalSMS: item.smsSend,
           totalColdCalls: item.coldCallsMade,
-          totalLeads: item.totalInboundLeads,
+          totalLeads: itemTotalLeads,
           hotLeads: item.hotLeads,
+          comparedProperties: item.comparedProperties,
           offers: item.offersSent,
           contracts: item.signedContracts,
           avgCloseRate: 0,
@@ -53,6 +59,7 @@ export function DataTable({ data }: DataTableProps) {
       totalColdCalls: member.totalColdCalls,
       totalLeads: member.totalLeads,
       hotLeads: member.hotLeads,
+      comparedProperties: member.comparedProperties,
       offers: member.offers,
       contracts: member.contracts,
       avgCloseRate: member.closeRates.length > 0 
@@ -79,6 +86,7 @@ export function DataTable({ data }: DataTableProps) {
               <TableHead className="text-muted-foreground text-right">Cold Calls</TableHead>
               <TableHead className="text-muted-foreground text-right">Total Leads</TableHead>
               <TableHead className="text-muted-foreground text-right">Hot Leads</TableHead>
+              <TableHead className="text-muted-foreground text-right">Compared Properties</TableHead>
               <TableHead className="text-muted-foreground text-right">Offers</TableHead>
               <TableHead className="text-muted-foreground text-right">Contracts</TableHead>
               <TableHead className="text-muted-foreground text-right">Avg Close Rate</TableHead>
@@ -93,6 +101,7 @@ export function DataTable({ data }: DataTableProps) {
                 <TableCell className="text-right">{row.totalColdCalls.toLocaleString('en-US')}</TableCell>
                 <TableCell className="text-right font-semibold text-primary">{row.totalLeads.toLocaleString('en-US')}</TableCell>
                 <TableCell className="text-right">{row.hotLeads.toLocaleString('en-US')}</TableCell>
+                <TableCell className="text-right">{row.comparedProperties.toLocaleString('en-US')}</TableCell>
                 <TableCell className="text-right">{row.offers.toLocaleString('en-US')}</TableCell>
                 <TableCell className="text-right font-semibold text-success">{row.contracts.toLocaleString('en-US')}</TableCell>
                 <TableCell className="text-right">{row.avgCloseRate.toFixed(1)}%</TableCell>
