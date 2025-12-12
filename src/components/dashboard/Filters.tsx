@@ -106,7 +106,7 @@ export function Filters({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 bg-popover border-border" align="start">
+        <PopoverContent className="w-auto p-0 bg-popover border-border z-50" align="start" sideOffset={4}>
           <Calendar
             initialFocus
             mode="range"
@@ -114,7 +114,6 @@ export function Filters({
             selected={dateRange}
             onSelect={handleDateSelect}
             numberOfMonths={2}
-            className="p-3 pointer-events-auto"
           />
         </PopoverContent>
       </Popover>
