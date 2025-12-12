@@ -8,14 +8,15 @@ interface LeadsChartProps {
 export function LeadsChart({ data }: LeadsChartProps) {
   // Group data by member name
   const groupedData = data.reduce((acc, item) => {
-    const existing = acc.find(x => x.name === item.name);
+    const firstName = item.name.split(' ')[0];
+    const existing = acc.find(x => x.name === firstName);
     if (existing) {
       existing.smsLeads += item.smsLeads;
       existing.coldCallLeads += item.coldCallLeads;
       existing.mailLeads += item.mailLeads;
     } else {
       acc.push({
-        name: item.name.split(' ')[0],
+        name: firstName,
         smsLeads: item.smsLeads,
         coldCallLeads: item.coldCallLeads,
         mailLeads: item.mailLeads,
