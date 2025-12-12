@@ -16,9 +16,39 @@ serve(async (req) => {
   }
 
   try {
+    // Parse request body for date filters
+    let fromDate: string | undefined;
+    let toDate: string | undefined;
+    
+    if (req.method === 'POST') {
+      try {
+        const body = await req.json();
+        fromDate = body.fromDate;
+        toDate = body.toDate;
+        console.log('Received date filters:', { fromDate, toDate });
+      } catch {
+        console.log('No body or invalid JSON, fetching all records');
+      }
+    }
+
     console.log('Fetching data from Airtable...');
     
-    const url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`;
+    let url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`;
+    
+    // Build filter formula for date range
+    if (fromDate && toDate) {
+      const formula = `AND(IS_AFTER({Date}, '${fromDate}'), IS_BEFORE({Date}, '${toDate}'))`;
+      url += `?filterByFormula=${encodeURIComponent(formula)}`;
+      console.log('Using date filter formula:', formula);
+    } else if (fromDate) {
+      const formula = `IS_AFTER({Date}, '${fromDate}')`;
+      url += `?filterByFormula=${encodeURIComponent(formula)}`;
+      console.log('Using from date filter:', formula);
+    } else if (toDate) {
+      const formula = `IS_BEFORE({Date}, '${toDate}')`;
+      url += `?filterByFormula=${encodeURIComponent(formula)}`;
+      console.log('Using to date filter:', formula);
+    }
     
     const response = await fetch(url, {
       headers: {
