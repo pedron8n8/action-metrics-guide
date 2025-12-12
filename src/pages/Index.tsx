@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
+import { format } from "date-fns";
 import { calculateTotals, KPIData } from "@/data/mockData";
 import { useAirtableData } from "@/hooks/useAirtableData";
 import { KPICard } from "@/components/dashboard/KPICard";
@@ -48,6 +49,19 @@ const Index = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   
   const { data: kpiData, loading, refetch } = useAirtableData();
+
+  // Refetch from Airtable when date range changes
+  const handleDateRangeChange = useCallback((range: DateRange | undefined) => {
+    setDateRange(range);
+    
+    if (range?.from && range?.to) {
+      const fromDate = format(range.from, 'yyyy-MM-dd');
+      const toDate = format(range.to, 'yyyy-MM-dd');
+      refetch({ fromDate, toDate });
+    } else if (!range) {
+      refetch();
+    }
+  }, [refetch]);
 
   const members = useMemo(() => 
     [...new Set(kpiData.map(item => item.name))],
@@ -153,9 +167,9 @@ const Index = () => {
             selectedPeriod={selectedPeriod}
             onPeriodChange={setSelectedPeriod}
             members={members}
-            onRefresh={refetch}
+            onRefresh={() => refetch()}
             dateRange={dateRange}
-            onDateRangeChange={setDateRange}
+            onDateRangeChange={handleDateRangeChange}
           />
         </header>
 
