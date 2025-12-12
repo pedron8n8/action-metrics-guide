@@ -31,6 +31,12 @@ const getDataByDate = (data: KPIData[], date: string) => {
   return data.filter(item => item.date === date);
 };
 
+// Parse a YYYY-MM-DD date string as a local date (avoid timezone issues)
+const parseLocalDate = (dateStr: string) => {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
+
 // Get unique dates sorted descending
 const getUniqueDates = (data: KPIData[]) => {
   return [...new Set(data.map(item => item.date))].sort((a, b) => b.localeCompare(a));
@@ -63,7 +69,7 @@ const Index = () => {
       toDate.setHours(23, 59, 59, 999);
       
       data = data.filter(item => {
-        const itemDate = new Date(item.date);
+        const itemDate = parseLocalDate(item.date);
         return itemDate >= fromDate && itemDate <= toDate;
       });
     } else if (selectedPeriod !== "all" && selectedPeriod !== "custom") {
@@ -82,7 +88,7 @@ const Index = () => {
           break;
       }
       
-      data = data.filter(item => new Date(item.date) >= filterDate);
+      data = data.filter(item => parseLocalDate(item.date) >= filterDate);
     }
     
     return data;
