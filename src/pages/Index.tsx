@@ -8,6 +8,7 @@ import { ConversionChart } from "@/components/dashboard/ConversionChart";
 import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
 import { DataTable } from "@/components/dashboard/DataTable";
 import { Filters } from "@/components/dashboard/Filters";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { DateRange } from "react-day-picker";
 import { 
   MessageSquare, 
@@ -151,10 +152,11 @@ const Index = () => {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 rounded-lg gradient-primary">
-                <BarChart3 className="h-6 w-6 text-white" />
+                <BarChart3 className="h-6 w-6 text-primary-foreground" />
               </div>
               <h1 className="text-3xl font-bold tracking-tight">KPI Dashboard</h1>
               {loading && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
+              <ThemeToggle />
             </div>
             <p className="text-muted-foreground">
               Team Performance Analysis • Real-time Airtable Data
