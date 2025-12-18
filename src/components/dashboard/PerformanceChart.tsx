@@ -1,11 +1,15 @@
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { KPIData } from '@/data/mockData';
+import { useTheme } from 'next-themes';
 
 interface PerformanceChartProps {
   data: KPIData[];
 }
 
 export function PerformanceChart({ data }: PerformanceChartProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   // Group data by member and calculate average rates
   const memberStats = data.reduce((acc, item) => {
     const existing = acc.find(x => x.name === item.name);
@@ -33,27 +37,33 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
     'Close Rate': Math.round(item.totalCloseRate / item.entries),
   }));
 
+  const gridColor = isDark ? 'hsl(217 33% 17%)' : 'hsl(220 13% 91%)';
+  const textColor = isDark ? 'hsl(215 20% 55%)' : 'hsl(220 9% 46%)';
+  const tooltipBg = isDark ? 'hsl(222 47% 10%)' : 'hsl(0 0% 100%)';
+  const tooltipBorder = isDark ? 'hsl(217 33% 17%)' : 'hsl(220 13% 91%)';
+  const tooltipText = isDark ? 'hsl(210 40% 98%)' : 'hsl(222 47% 11%)';
+
   return (
     <div className="glass rounded-xl p-6 animate-slide-up" style={{ animationDelay: '400ms' }}>
       <h3 className="text-lg font-semibold mb-6">Conversion Rates by Member (%)</h3>
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} barGap={4}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(217 33% 17%)" />
-            <XAxis dataKey="name" stroke="hsl(215 20% 55%)" fontSize={12} />
-            <YAxis stroke="hsl(215 20% 55%)" fontSize={12} domain={[0, 100]} />
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+            <XAxis dataKey="name" stroke={textColor} fontSize={12} />
+            <YAxis stroke={textColor} fontSize={12} domain={[0, 100]} />
             <Tooltip 
               contentStyle={{ 
-                backgroundColor: 'hsl(222 47% 10%)', 
-                border: '1px solid hsl(217 33% 17%)',
+                backgroundColor: tooltipBg, 
+                border: `1px solid ${tooltipBorder}`,
                 borderRadius: '8px',
-                color: 'hsl(210 40% 98%)'
+                color: tooltipText
               }}
               formatter={(value: number) => [`${value}%`, '']}
             />
             <Legend />
-            <Bar dataKey="SMS Rate" fill="hsl(217 91% 60%)" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="Cold Call Rate" fill="hsl(142 76% 45%)" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="SMS Rate" fill="hsl(217 91% 50%)" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="Cold Call Rate" fill="hsl(142 76% 36%)" radius={[4, 4, 0, 0]} />
             <Bar dataKey="Close Rate" fill="hsl(280 65% 60%)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>

@@ -51,7 +51,7 @@ export function KPICard({ title, value, change, icon: Icon, variant = "default",
           <Icon className={cn(
             "h-6 w-6",
             variant === "default" && "text-primary",
-            variant !== "default" && "text-white"
+            variant !== "default" && "text-primary-foreground"
           )} />
         </div>
       </div>
