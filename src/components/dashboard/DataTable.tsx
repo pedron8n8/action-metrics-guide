@@ -11,11 +11,15 @@ interface MemberSummary {
   name: string;
   totalSMS: number;
   totalColdCalls: number;
-  totalLeads: number;
+  totalMailReceived: number;
+  totalInboundLeads: number;
   hotLeads: number;
+  warmLeads: number;
   comparedProperties: number;
+  rejectedLeads: number;
   offers: number;
-  contracts: number;
+  contractsSent: number;
+  signedContracts: number;
   avgCloseRate: number;
 }
 
@@ -23,29 +27,34 @@ export function DataTable({ data }: DataTableProps) {
   // Group and aggregate data by member
   const memberData = useMemo(() => {
     const grouped = data.reduce((acc, item) => {
-      // Total Leads = SMS Leads + Cold Call Leads + Mail Leads
-      const itemTotalLeads = item.smsLeads + item.coldCallLeads + item.mailLeads;
-      
       const existing = acc.get(item.name);
       if (existing) {
         existing.totalSMS += item.smsSend;
         existing.totalColdCalls += item.coldCallsMade;
-        existing.totalLeads += itemTotalLeads;
+        existing.totalMailReceived += item.mailReceived;
+        existing.totalInboundLeads += item.totalInboundLeads;
         existing.hotLeads += item.hotLeads;
+        existing.warmLeads += item.warmLeads;
         existing.comparedProperties += item.comparedProperties;
+        existing.rejectedLeads += item.rejectedLeads;
         existing.offers += item.offersSent;
-        existing.contracts += item.signedContracts;
+        existing.contractsSent += item.contractsSent;
+        existing.signedContracts += item.signedContracts;
         existing.closeRates.push(item.closeRate);
       } else {
         acc.set(item.name, {
           name: item.name,
           totalSMS: item.smsSend,
           totalColdCalls: item.coldCallsMade,
-          totalLeads: itemTotalLeads,
+          totalMailReceived: item.mailReceived,
+          totalInboundLeads: item.totalInboundLeads,
           hotLeads: item.hotLeads,
+          warmLeads: item.warmLeads,
           comparedProperties: item.comparedProperties,
+          rejectedLeads: item.rejectedLeads,
           offers: item.offersSent,
-          contracts: item.signedContracts,
+          contractsSent: item.contractsSent,
+          signedContracts: item.signedContracts,
           avgCloseRate: 0,
           closeRates: [item.closeRate],
         });
@@ -57,11 +66,15 @@ export function DataTable({ data }: DataTableProps) {
       name: member.name,
       totalSMS: member.totalSMS,
       totalColdCalls: member.totalColdCalls,
-      totalLeads: member.totalLeads,
+      totalMailReceived: member.totalMailReceived,
+      totalInboundLeads: member.totalInboundLeads,
       hotLeads: member.hotLeads,
+      warmLeads: member.warmLeads,
       comparedProperties: member.comparedProperties,
+      rejectedLeads: member.rejectedLeads,
       offers: member.offers,
-      contracts: member.contracts,
+      contractsSent: member.contractsSent,
+      signedContracts: member.signedContracts,
       avgCloseRate: member.closeRates.length > 0 
         ? member.closeRates.reduce((a, b) => a + b, 0) / member.closeRates.length 
         : 0,
@@ -84,11 +97,15 @@ export function DataTable({ data }: DataTableProps) {
               <TableHead className="text-muted-foreground">Name</TableHead>
               <TableHead className="text-muted-foreground text-right">SMS Sent</TableHead>
               <TableHead className="text-muted-foreground text-right">Cold Calls</TableHead>
-              <TableHead className="text-muted-foreground text-right">Total Leads</TableHead>
+              <TableHead className="text-muted-foreground text-right">Mail Received</TableHead>
+              <TableHead className="text-muted-foreground text-right">Total Inbound</TableHead>
               <TableHead className="text-muted-foreground text-right">Hot Leads</TableHead>
-              <TableHead className="text-muted-foreground text-right">Compared Properties</TableHead>
+              <TableHead className="text-muted-foreground text-right">Warm Leads</TableHead>
+              <TableHead className="text-muted-foreground text-right">Compared Props</TableHead>
+              <TableHead className="text-muted-foreground text-right">Rejected</TableHead>
               <TableHead className="text-muted-foreground text-right">Offers</TableHead>
-              <TableHead className="text-muted-foreground text-right">Contracts</TableHead>
+              <TableHead className="text-muted-foreground text-right">Contracts Sent</TableHead>
+              <TableHead className="text-muted-foreground text-right">Signed</TableHead>
               <TableHead className="text-muted-foreground text-right">Avg Close Rate</TableHead>
               <TableHead className="text-muted-foreground">Performance</TableHead>
             </TableRow>
@@ -99,11 +116,15 @@ export function DataTable({ data }: DataTableProps) {
                 <TableCell className="font-medium">{row.name}</TableCell>
                 <TableCell className="text-right">{row.totalSMS.toLocaleString('en-US')}</TableCell>
                 <TableCell className="text-right">{row.totalColdCalls.toLocaleString('en-US')}</TableCell>
-                <TableCell className="text-right font-semibold text-primary">{row.totalLeads.toLocaleString('en-US')}</TableCell>
+                <TableCell className="text-right">{row.totalMailReceived.toLocaleString('en-US')}</TableCell>
+                <TableCell className="text-right font-semibold text-primary">{row.totalInboundLeads.toLocaleString('en-US')}</TableCell>
                 <TableCell className="text-right">{row.hotLeads.toLocaleString('en-US')}</TableCell>
+                <TableCell className="text-right">{row.warmLeads.toLocaleString('en-US')}</TableCell>
                 <TableCell className="text-right">{row.comparedProperties.toLocaleString('en-US')}</TableCell>
+                <TableCell className="text-right text-destructive">{row.rejectedLeads.toLocaleString('en-US')}</TableCell>
                 <TableCell className="text-right">{row.offers.toLocaleString('en-US')}</TableCell>
-                <TableCell className="text-right font-semibold text-success">{row.contracts.toLocaleString('en-US')}</TableCell>
+                <TableCell className="text-right">{row.contractsSent.toLocaleString('en-US')}</TableCell>
+                <TableCell className="text-right font-semibold text-success">{row.signedContracts.toLocaleString('en-US')}</TableCell>
                 <TableCell className="text-right">{row.avgCloseRate.toFixed(1)}%</TableCell>
                 <TableCell>{getPerformanceBadge(row.avgCloseRate)}</TableCell>
               </TableRow>

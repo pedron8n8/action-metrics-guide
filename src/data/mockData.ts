@@ -12,7 +12,7 @@ export interface KPIData {
   hotLeads: number;
   warmLeads: number;
   comparedProperties: number;
-  businessInProgress: number;
+  rejectedLeads: number;
   offersSent: number;
   contractsSent: number;
   signedContracts: number;
@@ -38,7 +38,7 @@ export const mockData: KPIData[] = [
     hotLeads: 4,
     warmLeads: 12,
     comparedProperties: 2,
-    businessInProgress: 1,
+    rejectedLeads: 1,
     offersSent: 4,
     contractsSent: 1,
     signedContracts: 1,
@@ -62,7 +62,7 @@ export const mockData: KPIData[] = [
     hotLeads: 2,
     warmLeads: 3,
     comparedProperties: 1,
-    businessInProgress: 1,
+    rejectedLeads: 1,
     offersSent: 1,
     contractsSent: 1,
     signedContracts: 0,
@@ -86,7 +86,7 @@ export const mockData: KPIData[] = [
     hotLeads: 0,
     warmLeads: 1,
     comparedProperties: 0,
-    businessInProgress: 2,
+    rejectedLeads: 2,
     offersSent: 12,
     contractsSent: 1,
     signedContracts: 0,
@@ -110,7 +110,7 @@ export const mockData: KPIData[] = [
     hotLeads: 6,
     warmLeads: 10,
     comparedProperties: 3,
-    businessInProgress: 2,
+    rejectedLeads: 2,
     offersSent: 5,
     contractsSent: 2,
     signedContracts: 1,
@@ -134,7 +134,7 @@ export const mockData: KPIData[] = [
     hotLeads: 5,
     warmLeads: 8,
     comparedProperties: 2,
-    businessInProgress: 3,
+    rejectedLeads: 3,
     offersSent: 3,
     contractsSent: 2,
     signedContracts: 1,
