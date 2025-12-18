@@ -71,13 +71,19 @@ serve(async (req) => {
       const fields = record.fields;
       
       // Calculate derived metrics
-      const smsSend = fields['SMS Send'] || fields['sms_send'] || 0;
+      const smsSend = fields['sms Sends'] || fields['SMS Send'] || fields['sms_send'] || 0;
       const smsLeads = fields['SMS Leads'] || fields['sms_leads'] || 0;
       const coldCallsMade = fields['Cold Calls Made'] || fields['cold_calls_made'] || 0;
       const coldCallLeads = fields['Cold Call Leads'] || fields['cold_call_leads'] || 0;
+      const mailReceived = fields['Mail Calls Recived'] || fields['Mail Received'] || fields['mail_received'] || 0;
+      const mailLeads = fields['Mail Leads'] || fields['mail_leads'] || 0;
+      const totalInboundLeads = fields['Total Inbound leads'] || fields['Total Inbound Leads'] || fields['total_inbound_leads'] || 0;
       const hotLeads = fields['Hot Leads'] || fields['hot_leads'] || 0;
       const warmLeads = fields['Warm Leads'] || fields['warm_leads'] || 0;
+      const comparedProperties = fields['Compared Properties'] || fields['compared_properties'] || 0;
+      const rejectedLeads = fields['Rejected Leads'] || fields['rejected_leads'] || 0;
       const offersSent = fields['Offers Sent'] || fields['offers_sent'] || 0;
+      const contractsSent = fields['Contracts Sent'] || fields['contracts_sent'] || 0;
       const signedContracts = fields['Signed Contracts'] || fields['signed_contracts'] || 0;
       
       // Calculate rates
@@ -96,15 +102,15 @@ serve(async (req) => {
         smsLeads,
         coldCallsMade,
         coldCallLeads,
-        mailReceived: fields['Mail Received'] || fields['mail_received'] || 0,
-        mailLeads: fields['Mail Leads'] || fields['mail_leads'] || 0,
-        totalInboundLeads: fields['Total Inbound Leads'] || fields['total_inbound_leads'] || 0,
+        mailReceived,
+        mailLeads,
+        totalInboundLeads,
         hotLeads,
         warmLeads,
-        comparedProperties: fields['Compared Properties'] || fields['compared_properties'] || 0,
-        businessInProgress: fields['Business in Progress'] || fields['business_in_progress'] || 0,
+        comparedProperties,
+        rejectedLeads,
         offersSent,
-        contractsSent: fields['Contracts Sent'] || fields['contracts_sent'] || 0,
+        contractsSent,
         signedContracts,
         smsLeadRate,
         coldCallRate,
