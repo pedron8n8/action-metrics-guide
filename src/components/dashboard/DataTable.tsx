@@ -81,12 +81,6 @@ export function DataTable({ data }: DataTableProps) {
     }));
   }, [data]);
 
-  const getPerformanceBadge = (rate: number) => {
-    if (rate >= 50) return <Badge className="bg-success/20 text-success border-0">Excellent</Badge>;
-    if (rate >= 25) return <Badge className="bg-warning/20 text-warning border-0">Good</Badge>;
-    return <Badge className="bg-destructive/20 text-destructive border-0">Needs Improvement</Badge>;
-  };
-
   return (
     <div className="glass rounded-xl p-6 animate-slide-up overflow-hidden" style={{ animationDelay: '500ms' }}>
       <h3 className="text-lg font-semibold mb-6">Member Breakdown</h3>
@@ -107,7 +101,6 @@ export function DataTable({ data }: DataTableProps) {
               <TableHead className="text-muted-foreground text-right">Contracts Sent</TableHead>
               <TableHead className="text-muted-foreground text-right">Signed</TableHead>
               <TableHead className="text-muted-foreground text-right">Avg Close Rate</TableHead>
-              <TableHead className="text-muted-foreground">Performance</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -126,7 +119,6 @@ export function DataTable({ data }: DataTableProps) {
                 <TableCell className="text-right">{row.contractsSent.toLocaleString('en-US')}</TableCell>
                 <TableCell className="text-right font-semibold text-success">{row.signedContracts.toLocaleString('en-US')}</TableCell>
                 <TableCell className="text-right">{row.avgCloseRate.toFixed(1)}%</TableCell>
-                <TableCell>{getPerformanceBadge(row.avgCloseRate)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
