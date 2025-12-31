@@ -31,24 +31,10 @@ serve(async (req) => {
       }
     }
 
-    console.log('Fetching data from Airtable...');
+    console.log('Fetching all data from Airtable (filtering done client-side)...');
     
-    let url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`;
-    
-    // Build filter formula for date range
-    if (fromDate && toDate) {
-      const formula = `AND(IS_AFTER({Date}, '${fromDate}'), IS_BEFORE({Date}, '${toDate}'))`;
-      url += `?filterByFormula=${encodeURIComponent(formula)}`;
-      console.log('Using date filter formula:', formula);
-    } else if (fromDate) {
-      const formula = `IS_AFTER({Date}, '${fromDate}')`;
-      url += `?filterByFormula=${encodeURIComponent(formula)}`;
-      console.log('Using from date filter:', formula);
-    } else if (toDate) {
-      const formula = `IS_BEFORE({Date}, '${toDate}')`;
-      url += `?filterByFormula=${encodeURIComponent(formula)}`;
-      console.log('Using to date filter:', formula);
-    }
+    // Fetch all records - date filtering is handled client-side
+    const url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`;
     
     const response = await fetch(url, {
       headers: {
