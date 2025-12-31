@@ -9,6 +9,10 @@ import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
 import { DataTable } from "@/components/dashboard/DataTable";
 import { Filters } from "@/components/dashboard/Filters";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { FunnelChart } from "@/components/dashboard/FunnelChart";
+import { ConversionRatesCard } from "@/components/dashboard/ConversionRatesCard";
+import { RolePerformanceCards } from "@/components/dashboard/RolePerformanceCards";
+import { TrendsChart } from "@/components/dashboard/TrendsChart";
 import { DateRange } from "react-day-picker";
 import { 
   MessageSquare, 
@@ -244,6 +248,17 @@ const Index = () => {
           />
         </section>
 
+        {/* Funnel & Conversion Rates */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <FunnelChart data={filteredData} />
+          <ConversionRatesCard data={filteredData} />
+        </section>
+
+        {/* Role-Based Performance */}
+        <section>
+          <RolePerformanceCards data={filteredData} />
+        </section>
+
         {/* Charts Row */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <LeadsChart data={filteredData} />
@@ -252,6 +267,11 @@ const Index = () => {
             warmLeads={totals.totalWarmLeads}
             coldLeads={coldLeads > 0 ? coldLeads : 0}
           />
+        </section>
+
+        {/* Performance Trends */}
+        <section>
+          <TrendsChart data={filteredData} />
         </section>
 
         {/* Performance Chart */}
