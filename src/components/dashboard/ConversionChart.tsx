@@ -1,5 +1,6 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { useTheme } from 'next-themes';
+import { InfoTooltip } from '@/components/ui/info-tooltip';
 
 interface ConversionChartProps {
   hotLeads: number;
@@ -25,7 +26,10 @@ export function ConversionChart({ hotLeads, warmLeads, coldLeads }: ConversionCh
 
   return (
     <div className="glass rounded-xl p-6 animate-slide-up" style={{ animationDelay: '300ms' }}>
-      <h3 className="text-lg font-semibold mb-6">Lead Qualification</h3>
+      <div className="flex items-center gap-2 mb-6">
+        <h3 className="text-lg font-semibold">Lead Qualification</h3>
+        <InfoTooltip content="Breakdown of leads by their qualification status: Hot (Ready to engage), Warm (Interested), and Cold (Not interested or unresponsive)." />
+      </div>
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>

@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { LucideIcon, TrendingUp, TrendingDown } from "lucide-react";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 
 interface KPICardProps {
   title: string;
@@ -8,9 +9,10 @@ interface KPICardProps {
   icon: LucideIcon;
   variant?: "default" | "primary" | "success" | "warning";
   delay?: number;
+  description?: string;
 }
 
-export function KPICard({ title, value, change, icon: Icon, variant = "default", delay = 0 }: KPICardProps) {
+export function KPICard({ title, value, change, icon: Icon, variant = "default", delay = 0, description }: KPICardProps) {
   const isPositive = change && change > 0;
   const isNegative = change && change < 0;
 
@@ -26,7 +28,10 @@ export function KPICard({ title, value, change, icon: Icon, variant = "default",
     >
       <div className="flex items-start justify-between">
         <div className="space-y-2">
-          <p className="text-sm text-muted-foreground font-medium">{title}</p>
+          <div className="flex items-center">
+            <p className="text-sm text-muted-foreground font-medium">{title}</p>
+            {description && <InfoTooltip content={description} />}
+          </div>
           <p className="text-3xl font-bold tracking-tight">{value}</p>
           {change !== undefined && (
             <div className={cn(

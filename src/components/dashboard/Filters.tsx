@@ -74,8 +74,8 @@ export function Filters({
           <SelectContent className="bg-popover border-border">
             <SelectItem value="all">All Time</SelectItem>
             <SelectItem value="today">Today</SelectItem>
-            <SelectItem value="week">Last Week</SelectItem>
-            <SelectItem value="month">Last Month</SelectItem>
+            <SelectItem value="week">This Week</SelectItem>
+            <SelectItem value="month">This Month</SelectItem>
             {dateRange?.from && dateRange?.to && (
               <SelectItem value="custom">Custom Range</SelectItem>
             )}

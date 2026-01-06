@@ -2,6 +2,8 @@ import { useState, useMemo, useCallback } from "react";
 import { format } from "date-fns";
 import { calculateTotals, KPIData } from "@/data/mockData";
 import { useAirtableData } from "@/hooks/useAirtableData";
+import { useDashboard } from "@/hooks/useDashboard";
+import { Link } from "react-router-dom";
 import { KPICard } from "@/components/dashboard/KPICard";
 import { LeadsChart } from "@/components/dashboard/LeadsChart";
 import { ConversionChart } from "@/components/dashboard/ConversionChart";
@@ -9,10 +11,11 @@ import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
 import { DataTable } from "@/components/dashboard/DataTable";
 import { Filters } from "@/components/dashboard/Filters";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Button } from "@/components/ui/button";
 import { FunnelChart } from "@/components/dashboard/FunnelChart";
 import { ConversionRatesCard } from "@/components/dashboard/ConversionRatesCard";
 import { RolePerformanceCards } from "@/components/dashboard/RolePerformanceCards";
-import { TrendsChart } from "@/components/dashboard/TrendsChart";
+import { RoleImprovement } from "@/components/dashboard/RoleImprovement";
 import { DateRange } from "react-day-picker";
 import { 
   MessageSquare, 
@@ -37,10 +40,31 @@ const getDataByDate = (data: KPIData[], date: string) => {
   return data.filter(item => item.date === date);
 };
 
-// Parse a YYYY-MM-DD date string as a local date (avoid timezone issues)
-const parseLocalDate = (dateStr: string) => {
-  const [year, month, day] = dateStr.split("-").map(Number);
-  return new Date(year, month - 1, day);
+// Parse a date string to a Date object (handles YYYY-MM-DD and other formats)
+const parseLocalDate = (dateStr: string): Date => {
+  if (!dateStr) return new Date(0);
+  
+  // If it's already in YYYY-MM-DD format
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [year, month, day] = dateStr.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  }
+  
+  // Try to parse ISO format or other formats
+  const parsed = new Date(dateStr);
+  if (!isNaN(parsed.getTime())) {
+    return parsed;
+  }
+  
+  return new Date(0);
+};
+
+// Format date as YYYY-MM-DD for comparison
+const formatDateToCompare = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
 // Get unique dates sorted descending
@@ -53,20 +77,23 @@ const Index = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("all");
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   
+  const { benchmarks } = useDashboard();
   const { data: kpiData, loading, refetch } = useAirtableData();
+
+  // Handle period change by clearing date range if a preset is selected
+  const handlePeriodChange = (value: string) => {
+    setSelectedPeriod(value);
+    if (value !== "custom") {
+      setDateRange(undefined);
+    }
+  };
 
   // Refetch from Airtable when date range changes
   const handleDateRangeChange = useCallback((range: DateRange | undefined) => {
     setDateRange(range);
-    
-    if (range?.from && range?.to) {
-      const fromDate = format(range.from, 'yyyy-MM-dd');
-      const toDate = format(range.to, 'yyyy-MM-dd');
-      refetch({ fromDate, toDate });
-    } else if (!range) {
-      refetch();
-    }
-  }, [refetch]);
+    // Filtering is now handled client-side in the useMemo below
+    // We do not need to refetch from the backend
+  }, []);
 
   const members = useMemo(() => 
     [...new Set(kpiData.map(item => item.name))],
@@ -76,40 +103,78 @@ const Index = () => {
   const filteredData = useMemo(() => {
     let data = kpiData;
     
+    // Log data for debugging
+    console.log('Total kpiData records:', kpiData.length);
+    console.log('Sample dates:', kpiData.slice(0, 3).map(d => d.date));
+    
     if (selectedMember !== "all") {
       data = data.filter(item => item.name === selectedMember);
     }
     
     // Custom date range takes priority
-    if (dateRange?.from && dateRange?.to) {
-      const fromDate = new Date(dateRange.from);
-      fromDate.setHours(0, 0, 0, 0);
-      const toDate = new Date(dateRange.to);
-      toDate.setHours(23, 59, 59, 999);
+    if (dateRange?.from) {
+      const fromStr = formatDateToCompare(dateRange.from);
+      const toStr = dateRange.to ? formatDateToCompare(dateRange.to) : fromStr;
+      
+      console.log('Filtering by date range:', fromStr, 'to', toStr);
       
       data = data.filter(item => {
-        const itemDate = parseLocalDate(item.date);
-        return itemDate >= fromDate && itemDate <= toDate;
+        const itemDateStr = item.date.split('T')[0]; // Handle ISO format
+        return itemDateStr >= fromStr && itemDateStr <= toStr;
       });
+      
+      console.log('Filtered by date range, remaining:', data.length);
     } else if (selectedPeriod !== "all" && selectedPeriod !== "custom") {
-      const today = new Date();
-      const filterDate = new Date();
+      // Get all unique dates from ALL data (before member filter)
+      const allDates = getUniqueDates(kpiData);
+      console.log('All unique dates:', allDates);
+      
+      if (allDates.length === 0) return data;
+      
+      // Use the most recent date in the data as the reference point
+      const latestDateStr = allDates[0];
+      const latestDataDate = parseLocalDate(latestDateStr);
+      
+      console.log('Latest date in data:', latestDateStr, latestDataDate);
       
       switch (selectedPeriod) {
         case "today":
-          filterDate.setHours(0, 0, 0, 0);
+          // Filter only records from the latest date
+          console.log('Filtering for today (latest):', latestDateStr);
+          data = data.filter(item => {
+            const itemDateStr = item.date.split('T')[0];
+            return itemDateStr === latestDateStr;
+          });
+          console.log('After today filter:', data.length);
           break;
-        case "week":
-          filterDate.setDate(today.getDate() - 7);
+        case "week": {
+          const weekAgo = new Date(latestDataDate);
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          const weekAgoStr = formatDateToCompare(weekAgo);
+          console.log('Filtering for week, from:', weekAgoStr, 'to:', latestDateStr);
+          data = data.filter(item => {
+            const itemDateStr = item.date.split('T')[0];
+            return itemDateStr >= weekAgoStr && itemDateStr <= latestDateStr;
+          });
+          console.log('After week filter:', data.length);
           break;
-        case "month":
-          filterDate.setMonth(today.getMonth() - 1);
+        }
+        case "month": {
+          const monthAgo = new Date(latestDataDate);
+          monthAgo.setMonth(monthAgo.getMonth() - 1);
+          const monthAgoStr = formatDateToCompare(monthAgo);
+          console.log('Filtering for month, from:', monthAgoStr, 'to:', latestDateStr);
+          data = data.filter(item => {
+            const itemDateStr = item.date.split('T')[0];
+            return itemDateStr >= monthAgoStr && itemDateStr <= latestDateStr;
+          });
+          console.log('After month filter:', data.length);
           break;
+        }
       }
-      
-      data = data.filter(item => parseLocalDate(item.date) >= filterDate);
     }
     
+    console.log('Final filtered data count:', data.length);
     return data;
   }, [kpiData, selectedMember, selectedPeriod, dateRange]);
 
@@ -160,6 +225,9 @@ const Index = () => {
               </div>
               <h1 className="text-3xl font-bold tracking-tight">KPI Dashboard</h1>
               {loading && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
+              <Link to="/settings" className="ml-auto lg:ml-4">
+                 <Button variant="outline" size="sm">Settings</Button>
+              </Link>
               <ThemeToggle />
             </div>
             <p className="text-muted-foreground">
@@ -171,7 +239,7 @@ const Index = () => {
             selectedMember={selectedMember}
             onMemberChange={setSelectedMember}
             selectedPeriod={selectedPeriod}
-            onPeriodChange={setSelectedPeriod}
+            onPeriodChange={handlePeriodChange}
             members={members}
             onRefresh={() => refetch()}
             dateRange={dateRange}
@@ -188,6 +256,7 @@ const Index = () => {
             icon={MessageSquare}
             variant="primary"
             delay={0}
+            description="Total number of SMS messages sent in the selected period."
           />
           <KPICard
             title="Cold Calls Made"
@@ -195,6 +264,7 @@ const Index = () => {
             change={changes.totalColdCalls}
             icon={Phone}
             delay={50}
+            description="Total number of cold calls attempted in the selected period."
           />
           <KPICard
             title="Total Inbound Leads"
@@ -203,6 +273,7 @@ const Index = () => {
             icon={Users}
             variant="success"
             delay={100}
+            description="Number of leads that came in through inbound channels."
           />
           <KPICard
             title="Hot Leads"
@@ -211,6 +282,7 @@ const Index = () => {
             icon={Target}
             variant="warning"
             delay={150}
+            description="Leads categorized as 'Hot' who are ready to move forward."
           />
         </section>
 
@@ -222,6 +294,7 @@ const Index = () => {
             change={changes.totalOffers}
             icon={FileText}
             delay={200}
+            description="Total number of property offers sent to leads."
           />
           <KPICard
             title="Signed Contracts"
@@ -230,21 +303,25 @@ const Index = () => {
             icon={CheckCircle2}
             variant="success"
             delay={250}
+            description="Number of contracts successfully signed."
           />
           <KPICard
             title="Avg SMS Rate"
             value={`${totals.avgSMSRate.toFixed(1)}%`}
             change={changes.avgSMSRate}
             icon={TrendingUp}
+            variant={totals.avgSMSRate >= benchmarks.smsResponseRate.min ? "success" : "warning"}
             delay={300}
+            description="Percentage of SMS campaigns that resulted in a lead."
           />
           <KPICard
             title="Avg Close Rate"
             value={`${totals.avgCloseRate.toFixed(1)}%`}
             change={changes.avgCloseRate}
             icon={Target}
-            variant="primary"
+            variant={totals.avgCloseRate >= benchmarks.contractSignRate.min ? "success" : "warning"}
             delay={350}
+            description="Percentage of sent contracts that were successfully signed."
           />
         </section>
 
@@ -271,7 +348,7 @@ const Index = () => {
 
         {/* Performance Trends */}
         <section>
-          <TrendsChart data={filteredData} />
+          <RoleImprovement data={filteredData} />
         </section>
 
         {/* Performance Chart */}

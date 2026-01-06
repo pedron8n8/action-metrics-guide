@@ -13,15 +13,15 @@ export const useAirtableData = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = useCallback(async (params?: FetchParams) => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     
     try {
-      console.log('Fetching Airtable data with params:', params);
+      console.log('Fetching all Airtable data...');
       
       const { data: response, error: fetchError } = await supabase.functions.invoke('fetch-airtable', {
-        body: params || {}
+        body: {}
       });
       
       if (fetchError) {

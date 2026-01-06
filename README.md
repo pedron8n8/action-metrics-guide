@@ -1,73 +1,88 @@
-# Welcome to your Lovable project
+# KPI Dashboard - Bella Terra
 
-## Project info
+This project is a comprehensive KPI (Key Performance Indicator) Dashboard built for Bella Terra to track and visualize marketing and sales performance metrics. It aggregates data from various channels (SMS, Cold Calls, Mail, Inbound) and presents actionable insights through interactive charts and data tables.
 
-**URL**: https://lovable.dev/projects/97b8a15f-f22e-4d49-9f40-a969babd53a9
+## 🚀 Features
 
-## How can I edit this code?
+### Dashboard Overview
 
-There are several ways of editing your application.
+The dashboard provides a high-level view of:
 
-**Use Lovable**
+- **Daily Performance:** KPI Cards showing critical metrics with daily percentage changes.
+- **Lead Generation:** Visual breakdown of leads by source (SMS, Cold Call, Mail).
+- **Sales Funnel:** A complete funnel visualization tracking the journey from initial Outreach to Signed Contracts.
+- **Conversion Rates:** Analysis of conversion efficiency at each stage of the pipeline.
+- **Team Performance:** Metrics grouped by team members to track individual contributions.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/97b8a15f-f22e-4d49-9f40-a969babd53a9) and start prompting.
+### Key Metrics Tracked
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Outreach:** SMS Sent, Cold Calls Made, Mail Received.
+- **Leads:** SMS Leads, Cold Call Leads, Hot/Warm Leads, Total Inbound.
+- **Sales Pipeline:** Compared Properties, Offers Sent, Contracts Sent, Signed Contracts.
+- **Derived Rates:**
+  - SMS Lead Rate
+  - Cold Call Rate
+  - Qualification Fee
+  - Close Rate
 
-**Use your preferred IDE**
+### Tech Stack
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Frontend:** React, TypeScript, Vite
+- **Styling:** Tailwind CSS, Shadcn UI
+- **Data Visualization:** Recharts
+- **State Management:** TanStack Query (React Query)
+- **Backend/Integration:** Supabase (Edge Functions), Airtable (Data Source)
+- **Routing:** React Router
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🛠️ Setup & Installation
 
-Follow these steps:
+1. **Clone the repository:**
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+   ```bash
+   git clone <repository-url>
+   cd kpi-page
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2. **Install dependencies:**
 
-# Step 3: Install the necessary dependencies.
-npm i
+   ```bash
+   npm install
+   # or
+   bun install
+   ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+3. **Environment Variables:**
+   Create a `.env` file in the root directory with the following Supabase configuration:
 
-**Edit a file directly in GitHub**
+   ```env
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+4. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
 
-**Use GitHub Codespaces**
+## 📂 Project Structure
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- **`src/components/dashboard/`**: Contains all the visualization components (Charts, KPI Cards, Data Tables).
+- **`src/data/`**: Mock data definitions and types for development.
+- **`src/hooks/`**: Custom hooks, including `useAirtableData` for fetching live data.
+- **`src/pages/`**: Main application pages (`Index.tsx` is the primary dashboard).
+- **`supabase/functions/fetch-airtable/`**: Edge function responsible for securely fetching and transforming data from Airtable.
 
-## What technologies are used for this project?
+## 🔌 Integrations
 
-This project is built with:
+### Airtable & Supabase
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+The application uses a Supabase Edge Function (`fetch-airtable`) to act as a secure proxy between the frontend and Airtable.
 
-## How can I deploy this project?
+- **Data Flow:** Frontend -> Supabase Edge Function -> Airtable API -> Frontend.
+- **Transformation:** The Edge Function handles data normalization and calculates derived rates (e.g., Close Rate %) before sending it to the client.
 
-Simply open [Lovable](https://lovable.dev/projects/97b8a15f-f22e-4d49-9f40-a969babd53a9) and click on Share -> Publish.
+## 🎨 UI/UX
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- **Theme:** Supports Light/Dark mode toggling.
+- **Responsive:** Fully responsive design utilizing Tailwind CSS.
+- **Interactive:** Hover states on charts and sortable data tables.

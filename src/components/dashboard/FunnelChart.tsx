@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { KPIData } from "@/data/mockData";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 
 interface FunnelChartProps {
   data: KPIData[];
@@ -57,7 +58,10 @@ export function FunnelChart({ data }: FunnelChartProps) {
 
   return (
     <div className="glass rounded-xl p-6 animate-slide-up" style={{ animationDelay: "200ms" }}>
-      <h3 className="text-lg font-semibold mb-6">Sales Funnel</h3>
+      <div className="flex items-center gap-2 mb-6">
+        <h3 className="text-lg font-semibold">Sales Funnel</h3>
+        <InfoTooltip content="Visualize the progression from initial outreach (SMS/Calls) to signed contracts. The percentage shows the conversion rate from one stage to the next." />
+      </div>
       <div className="space-y-3">
         {funnelData.map((item, index) => {
           const widthPercent = Math.max((item.value / maxValue) * 100, 8);

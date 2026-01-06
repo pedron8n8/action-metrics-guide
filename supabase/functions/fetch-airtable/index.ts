@@ -56,6 +56,39 @@ serve(async (req) => {
     const kpiData = data.records.map((record: any, index: number) => {
       const fields = record.fields;
       
+      // Parse date - Airtable may return different formats
+      const rawDate = fields['Date'] || fields['date'] || fields['DATA'] || fields['Data'] || null;
+      let parsedDate: string;
+      
+      if (rawDate) {
+        // Log the raw date for debugging
+        if (index === 0) {
+          console.log('Sample raw date from Airtable:', rawDate, 'Type:', typeof rawDate);
+        }
+        
+        // Check if it's in DD/MM/YYYY format
+        if (typeof rawDate === 'string' && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(rawDate)) {
+          const [day, month, year] = rawDate.split('/');
+          parsedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        }
+        // Check if it's already in YYYY-MM-DD format
+        else if (typeof rawDate === 'string' && /^\d{4}-\d{2}-\d{2}/.test(rawDate)) {
+          parsedDate = rawDate.split('T')[0]; // Handle ISO format
+        }
+        // Try to parse as Date object
+        else {
+          const dateObj = new Date(rawDate);
+          if (!isNaN(dateObj.getTime())) {
+            parsedDate = dateObj.toISOString().split('T')[0];
+          } else {
+            parsedDate = new Date().toISOString().split('T')[0];
+          }
+        }
+      } else {
+        console.log('No date field found for record', index, 'Fields:', Object.keys(fields));
+        parsedDate = new Date().toISOString().split('T')[0];
+      }
+      
       // Calculate derived metrics
       const smsSend = fields['sms Sends'] || fields['SMS Send'] || fields['sms_send'] || 0;
       const smsLeads = fields['SMS Leads'] || fields['sms_leads'] || 0;
@@ -83,7 +116,7 @@ serve(async (req) => {
       return {
         id: index + 1,
         name: fields['Name'] || fields['name'] || 'Unknown',
-        date: fields['Date'] || fields['date'] || new Date().toISOString().split('T')[0],
+        date: parsedDate,
         smsSend,
         smsLeads,
         coldCallsMade,

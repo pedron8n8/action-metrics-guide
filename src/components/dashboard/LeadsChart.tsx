@@ -1,6 +1,7 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { KPIData } from '@/data/mockData';
 import { useTheme } from 'next-themes';
+import { InfoTooltip } from '@/components/ui/info-tooltip';
 
 interface LeadsChartProps {
   data: KPIData[];
@@ -44,7 +45,10 @@ export function LeadsChart({ data }: LeadsChartProps) {
 
   return (
     <div className="glass rounded-xl p-6 animate-slide-up" style={{ animationDelay: '200ms' }}>
-      <h3 className="text-lg font-semibold mb-6">Leads by Channel</h3>
+      <div className="flex items-center gap-2 mb-6">
+        <h3 className="text-lg font-semibold">Leads by Channel</h3>
+        <InfoTooltip content="Distribution of generated leads across different marketing channels (SMS, Cold Call, Mail) for each team member." />
+      </div>
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} barGap={4}>

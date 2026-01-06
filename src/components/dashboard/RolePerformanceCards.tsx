@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { KPIData } from "@/data/mockData";
 import { Phone, MessageSquare, FileCheck, Search, Crown } from "lucide-react";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 
 interface RolePerformanceCardsProps {
   data: KPIData[];
@@ -20,8 +21,14 @@ export function RolePerformanceCards({ data }: RolePerformanceCardsProps) {
   const rolePerformance = useMemo((): RolePerformance[] => {
     // Group data by member
     const memberStats = data.reduce((acc, item) => {
-      const existing = acc.get(item.name) || {
-        name: item.name,
+      // Alias handling for RolePerformanceCards too
+      let name = item.name;
+      if (name.includes("Leah")) name = "Zia";
+      if (name.includes("Kyle")) name = "Alex";
+      // Ensure specific team members are tracked correctly if names vary in data vs display
+
+      const existing = acc.get(name) || {
+        name: name,
         coldCalls: 0,
         coldCallLeads: 0,
         smsSent: 0,
@@ -143,7 +150,10 @@ export function RolePerformanceCards({ data }: RolePerformanceCardsProps) {
 
   return (
     <div className="glass rounded-xl p-6 animate-slide-up" style={{ animationDelay: "400ms" }}>
-      <h3 className="text-lg font-semibold mb-6">Role-Based Performance</h3>
+      <div className="flex items-center gap-2 mb-6">
+        <h3 className="text-lg font-semibold">Role-Based Performance</h3>
+        <InfoTooltip content="Top performers and average metrics for each specific role (Cold Caller, SMS, Acquisitions, Analyst)." />
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {rolePerformance.map((role) => (
           <div

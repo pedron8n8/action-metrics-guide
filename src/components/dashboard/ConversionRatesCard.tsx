@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { KPIData } from "@/data/mockData";
 import { ArrowRight, TrendingUp, TrendingDown } from "lucide-react";
+import { useDashboard } from "@/hooks/useDashboard";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 
 interface ConversionRatesCardProps {
   data: KPIData[];
@@ -11,9 +13,12 @@ interface ConversionStage {
   to: string;
   rate: number;
   isGood: boolean;
+  description: string;
 }
 
 export function ConversionRatesCard({ data }: ConversionRatesCardProps) {
+  const { benchmarks } = useDashboard();
+
   const conversionRates = useMemo((): ConversionStage[] => {
     const totals = data.reduce(
       (acc, item) => ({
@@ -49,50 +54,62 @@ export function ConversionRatesCard({ data }: ConversionRatesCardProps) {
         from: "SMS",
         to: "Leads",
         rate: totals.smsSent > 0 ? (totals.smsLeads / totals.smsSent) * 100 : 0,
-        isGood: totals.smsSent > 0 ? (totals.smsLeads / totals.smsSent) * 100 >= 1 : false,
+        isGood: totals.smsSent > 0 ? (totals.smsLeads / totals.smsSent) * 100 >= benchmarks.smsResponseRate.min : false,
+        description: "Percentage of SMS sent that resulted in a lead response.",
       },
       {
         from: "Cold Calls",
         to: "Leads",
         rate: totals.coldCalls > 0 ? (totals.coldCallLeads / totals.coldCalls) * 100 : 0,
-        isGood: totals.coldCalls > 0 ? (totals.coldCallLeads / totals.coldCalls) * 100 >= 2 : false,
+        isGood: totals.coldCalls > 0 ? (totals.coldCallLeads / totals.coldCalls) * 100 >= benchmarks.coldCallResponseRate.min : false,
+        description: "Percentage of cold calls that resulted in a lead.",
       },
       {
         from: "Leads",
         to: "Qualified",
         rate: totals.totalLeads > 0 ? (qualifiedLeads / totals.totalLeads) * 100 : 0,
-        isGood: totals.totalLeads > 0 ? (qualifiedLeads / totals.totalLeads) * 100 >= 20 : false,
+        isGood: totals.totalLeads > 0 ? (qualifiedLeads / totals.totalLeads) * 100 >= benchmarks.leadToQualifiedRate.min : false,
+        description: "Percentage of total leads that were qualified as Hot or Warm.",
       },
       {
         from: "Qualified",
         to: "Offers",
         rate: qualifiedLeads > 0 ? (totals.offers / qualifiedLeads) * 100 : 0,
-        isGood: qualifiedLeads > 0 ? (totals.offers / qualifiedLeads) * 100 >= 30 : false,
+        isGood: qualifiedLeads > 0 ? (totals.offers / qualifiedLeads) * 100 >= benchmarks.qualifiedToOfferRate.min : false,
+        description: "Percentage of qualified leads that received an offer.",
       },
       {
         from: "Offers",
         to: "Contracts",
         rate: totals.offers > 0 ? (totals.contracts / totals.offers) * 100 : 0,
-        isGood: totals.offers > 0 ? (totals.contracts / totals.offers) * 100 >= 20 : false,
+        isGood: totals.offers > 0 ? (totals.contracts / totals.offers) * 100 >= benchmarks.offerToContractRate.min : false,
+        description: "Percentage of offers sent that proceeded to a contract.",
       },
       {
         from: "Contracts",
         to: "Signed",
         rate: totals.contracts > 0 ? (totals.signed / totals.contracts) * 100 : 0,
-        isGood: totals.contracts > 0 ? (totals.signed / totals.contracts) * 100 >= 30 : false,
+        isGood: totals.contracts > 0 ? (totals.signed / totals.contracts) * 100 >= benchmarks.contractSignRate.min : false,
+        description: "Percentage of contracts sent that were signed.",
       },
     ];
-  }, [data]);
+  }, [data, benchmarks]);
 
   return (
     <div className="glass rounded-xl p-6 animate-slide-up" style={{ animationDelay: "300ms" }}>
-      <h3 className="text-lg font-semibold mb-6">Conversion Rates by Stage</h3>
+      <div className="flex items-center gap-2 mb-6">
+        <h3 className="text-lg font-semibold">Conversion Rates by Stage</h3>
+        <InfoTooltip content="Detailed conversion percentages between each stage of the funnel. Green arrows indicate specific stage performance is meeting the 'Min' benchmark." />
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {conversionRates.map((stage) => (
           <div
             key={`${stage.from}-${stage.to}`}
-            className="bg-accent/30 rounded-lg p-4 border border-border/30"
+            className="bg-accent/30 rounded-lg p-4 border border-border/30 relative group"
           >
+            <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-100 transition-opacity">
+                 <InfoTooltip content={stage.description} />
+            </div>
             <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
               <span>{stage.from}</span>
               <ArrowRight className="w-3 h-3" />
