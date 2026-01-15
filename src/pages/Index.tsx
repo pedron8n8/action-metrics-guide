@@ -78,7 +78,20 @@ const Index = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   
   const { benchmarks } = useDashboard();
-  const { data: kpiData, loading, refetch } = useAirtableData();
+  
+  const filterParams = useMemo(() => {
+    if (dateRange?.from && dateRange?.to) {
+      return {
+        fromDate: formatDateToCompare(dateRange.from),
+        toDate: formatDateToCompare(dateRange.to)
+      };
+    } else if (selectedPeriod !== "all" && selectedPeriod !== "custom") {
+      return { period: selectedPeriod };
+    }
+    return {};
+  }, [dateRange, selectedPeriod]);
+
+  const { data: kpiData, loading, refetch } = useAirtableData(filterParams);
 
   // Handle period change by clearing date range if a preset is selected
   const handlePeriodChange = (value: string) => {
@@ -88,11 +101,11 @@ const Index = () => {
     }
   };
 
-  // Refetch from Airtable when date range changes
   const handleDateRangeChange = useCallback((range: DateRange | undefined) => {
     setDateRange(range);
-    // Filtering is now handled client-side in the useMemo below
-    // We do not need to refetch from the backend
+    if (range?.from && range?.to) {
+      setSelectedPeriod("custom");
+    }
   }, []);
 
   const members = useMemo(() => 
@@ -103,13 +116,12 @@ const Index = () => {
   const filteredData = useMemo(() => {
     let data = kpiData;
     
-    // Log data for debugging
-    console.log('Total kpiData records:', kpiData.length);
-    console.log('Sample dates:', kpiData.slice(0, 3).map(d => d.date));
-    
     if (selectedMember !== "all") {
       data = data.filter(item => item.name === selectedMember);
     }
+    
+    return data;
+  }, [kpiData, selectedMember]);
     
     // Custom date range takes priority
     if (dateRange?.from) {
@@ -189,7 +201,7 @@ const Index = () => {
     
     let changes: Record<string, number | undefined> = {};
     
-    if (latestDate && previousDate) {
+    if (latestDate && previousDate && (selectedPeriod === "all" || selectedPeriod === "custom")) {
       const todayData = getDataByDate(filteredData, latestDate);
       const yesterdayData = getDataByDate(filteredData, previousDate);
       
@@ -209,7 +221,7 @@ const Index = () => {
     }
     
     return { totals: currentTotals, changes };
-  }, [filteredData]);
+  }, [filteredData, selectedPeriod]);
 
   const coldLeads = totals.totalInbound - totals.totalHotLeads - totals.totalWarmLeads;
 
