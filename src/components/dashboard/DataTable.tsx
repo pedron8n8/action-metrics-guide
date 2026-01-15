@@ -104,8 +104,8 @@ export function DataTable({ data }: DataTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {memberData.map((row) => (
-              <TableRow key={row.name} className="border-border/30 hover:bg-accent/30">
+            {memberData.map((row, index) => (
+              <TableRow key={`${row.name}-${index}`} className="border-border/30 hover:bg-accent/30">
                 <TableCell className="font-medium">{row.name}</TableCell>
                 <TableCell className="text-right">{row.totalSMS.toLocaleString('en-US')}</TableCell>
                 <TableCell className="text-right">{row.totalColdCalls.toLocaleString('en-US')}</TableCell>

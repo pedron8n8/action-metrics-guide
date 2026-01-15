@@ -187,8 +187,8 @@ export function RoleImprovement({ data }: ImprovementPlanProps) {
         <InfoTooltip content="Actionable feedback for each team member based on their specific role benchmarks. Highlights areas performing well vs. needing improvement." />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {memberPerformance.map((member) => (
-          <Card key={member.name} className="border-l-4 border-l-primary/50">
+        {memberPerformance.map((member, memberIdx) => (
+          <Card key={`${member.name}-${memberIdx}`} className="border-l-4 border-l-primary/50">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center justify-between">
                 <div className="flex items-center gap-2">

@@ -24,7 +24,13 @@ export const useAirtableData = (params?: FetchParams) => {
     setError(null);
     
     try {
+      // Verify API key is loaded
+      if (!AIRTABLE_API_KEY) {
+        throw new Error('VITE_AIRTABLE_API_KEY not found in environment variables. Please add it to your .env file.');
+      }
+      
       console.log('Fetching Airtable data with filters:', params);
+      console.log('Using Base ID:', BASE_ID, 'Table ID:', TABLE_ID);
       
       let filterFormula = '';
       
@@ -59,23 +65,41 @@ export const useAirtableData = (params?: FetchParams) => {
       
       console.log('Fetching from Airtable URL:', url);
       
-      const response = await fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${AIRTABLE_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      // Fetch all records with pagination (Airtable limit is 100 per request)
+      let allRecords: any[] = [];
+      let offset: string | undefined;
+      
+      do {
+        let paginatedUrl = url;
+        
+        if (offset) {
+          const separator = url.includes('?') ? '&' : '?';
+          paginatedUrl = `${url}${separator}offset=${offset}`;
+        }
+        
+        const response = await fetch(paginatedUrl, {
+          headers: {
+            'Authorization': `Bearer ${AIRTABLE_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Airtable API error:', errorText);
-        throw new Error(`Airtable API error: ${response.status} - ${errorText}`);
-      }
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Airtable API error:', errorText);
+          throw new Error(`Airtable API error: ${response.status} - ${errorText}`);
+        }
 
-      const airtableData = await response.json();
-      console.log(`Fetched ${airtableData.records?.length || 0} records from Airtable`);
+        const airtableData = await response.json();
+        allRecords = allRecords.concat(airtableData.records || []);
+        offset = airtableData.offset;
+        
+        console.log(`Fetched ${airtableData.records?.length || 0} records (total so far: ${allRecords.length})`);
+      } while (offset);
+      
+      console.log(`Total records fetched from Airtable: ${allRecords.length}`);
 
-      const kpiData = airtableData.records.map((record: any, index: number) => {
+      const kpiData = allRecords.map((record: any, index: number) => {
         const fields = record.fields;
         
         const rawDate = fields['Date'] || fields['date'] || fields['DATA'] || fields['Data'] || null;

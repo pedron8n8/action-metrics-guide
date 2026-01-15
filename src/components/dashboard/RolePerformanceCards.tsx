@@ -179,7 +179,7 @@ export function RolePerformanceCards({ data }: RolePerformanceCardsProps) {
               <div className="space-y-2">
                 {role.members.map((member, idx) => (
                   <div
-                    key={member.name}
+                    key={`${role.role}-${member.name}-${idx}`}
                     className="flex items-center justify-between text-sm"
                   >
                     <div className="flex items-center gap-2">
